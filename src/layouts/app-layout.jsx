@@ -8,9 +8,7 @@ const AppLayout = () => {
         <Header/>
         <Outlet />
       </main>
-      <div className="p-10 text-center bg-gray-800 mt-10">
-        <h1>This is the footer</h1>
-      </div>
+      
     </div>
   );
 };
