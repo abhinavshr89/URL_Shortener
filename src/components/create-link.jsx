@@ -1,25 +1,28 @@
-import {Button} from "@/components/ui/button";
+import { UrlState } from '@/context';
+import React from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import {Input} from "@/components/ui/input";
-import {Card} from "./ui/card";
-import {useNavigate, useSearchParams} from "react-router-dom";
-import {useEffect, useRef, useState} from "react";
-import Error from "./error";
+  DialogFooter
+} from "@/components/ui/dialog"
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import Error from './error';
+import { Card } from './ui/card';
+import { useState } from 'react';
 import * as yup from "yup";
-import useFetch from "@/hooks/use-fetch";
-import {createUrl} from "@/db/apiUrls";
-import {BeatLoader} from "react-spinners";
-import {UrlState} from "@/context";
+import useFetch from '@/hooks/use-fetch';
+import { createUrl } from '@/db/apiUrl';
+import { useEffect } from 'react';
+import { useRef } from 'react';
 import {QRCode} from "react-qrcode-logo";
-
-export function CreateLink() {
+import { BeatLoader } from 'react-spinners';
+const CreateLink = () => {
   const {user} = UrlState();
 
   const navigate = useNavigate();
@@ -141,3 +144,5 @@ export function CreateLink() {
     </Dialog>
   );
 }
+
+export default CreateLink;
