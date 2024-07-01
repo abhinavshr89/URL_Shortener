@@ -40,7 +40,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/redirect/:id",
+        path: "/:id",
         element: <RedirectLink />,
       },
     ],

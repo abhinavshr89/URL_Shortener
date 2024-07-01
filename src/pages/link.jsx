@@ -1,19 +1,42 @@
-import { UrlState } from '@/context'
-import React from 'react'
+import React, { useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { UrlState } from '@/context';
 import useFetch from '@/hooks/use-fetch';
-import { useParams } from 'react-router-dom';
-import { getUrl } from '@/db/apiUrl';
+import { getUrl, deleteUrl } from '@/db/apiUrl';
 import { getClicksForUrl } from '@/db/apiClicks';
 import DeviceStats from "@/components/device-stats";
 import Location from "@/components/location-stats";
-import { useNavigate } from 'react-router-dom';
-import { deleteUrl } from '@/db/apiUrl';
-import { useEffect } from 'react';
-import {Copy, Download, LinkIcon, Trash} from "lucide-react";
+import { Copy, Download, LinkIcon, Trash } from "lucide-react";
 import { Button } from '@/components/ui/button';
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {BarLoader, BeatLoader} from "react-spinners";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarLoader, BeatLoader } from "react-spinners";
+
 const Link = () => {
+  const navigate = useNavigate();
+  const { user } = UrlState();
+  const { id } = useParams();
+
+  // Fetch URL data
+  const { loading, data: url, fn: fetchUrl, error } = useFetch(getUrl, { id, user_id: user?.id });
+  // Fetch click statistics
+  const { loading: loadingStats, data: stats, fn: fetchStats } = useFetch(getClicksForUrl, id);
+  // Handle URL deletion
+  const { loading: loadingDelete, fn: deleteUrlById } = useFetch(deleteUrl, id);
+
+  useEffect(() => {
+    fetchUrl();
+  }, []);
+
+  useEffect(() => {
+    if (!error && loading === false) fetchStats();
+  }, [loading, error]);
+
+  useEffect(() => {
+    if (error) {
+      navigate("/dashboard");
+    }
+  }, [error]);
+
   const downloadImage = () => {
     const imageUrl = url?.qr;
     const fileName = url?.title;
@@ -32,40 +55,8 @@ const Link = () => {
     // Remove the anchor from the document
     document.body.removeChild(anchor);
   };
-  const navigate = useNavigate();
-  const {user} = UrlState();
-  const {id} = useParams();
-  const {
-    loading,
-    data: url,
-    fn,
-    error,
-  } = useFetch(getUrl, {id, user_id: user?.id});
 
-  const {
-    loading: loadingStats,
-    data: stats,
-    fn: fnStats,
-  } = useFetch(getClicksForUrl, id);
-
-  const {loading: loadingDelete, fn: fnDelete} = useFetch(deleteUrl, id);
-
-  useEffect(() => {
-    fn();
-  }, []);
-
-  useEffect(() => {
-    if (!error && loading === false) fnStats();
-  }, [loading, error]);
-
-  if (error) {
-    navigate("/dashboard");
-  }
-
-  let link = "";
-  if (url) {
-    link = url?.custom_url ? url?.custom_url : url.short_url;
-  }
+  const link = url ? (url?.custom_url ? url.custom_url : url.short_url) : "";
 
   return (
     <>
@@ -78,15 +69,17 @@ const Link = () => {
             {url?.title}
           </span>
           <a
-            href={`https://url-shortener-henna-seven.vercel.app/redirect/${link}`}
+            href={`http://localhost:5173/${link}`}
             target="_blank"
+            rel="noopener noreferrer"
             className="text-3xl sm:text-4xl text-blue-400 font-bold hover:underline cursor-pointer"
           >
-            https://url-shortener-henna-seven.vercel.app/redirect/{link}
+            https://trimrr.in/{link}
           </a>
           <a
             href={url?.original_url}
             target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-1 hover:underline cursor-pointer"
           >
             <LinkIcon className="p-1" />
@@ -99,7 +92,7 @@ const Link = () => {
             <Button
               variant="ghost"
               onClick={() =>
-                navigator.clipboard.writeText(`https://url-shortener-henna-seven.vercel.app/redirect/${link}`)
+                navigator.clipboard.writeText(`https://trimrr.in/${link}`)
               }
             >
               <Copy />
@@ -110,11 +103,11 @@ const Link = () => {
             <Button
               variant="ghost"
               onClick={() =>
-                fnDelete().then(() => {
+                deleteUrlById().then(() => {
                   navigate("/dashboard");
                 })
               }
-              disable={loadingDelete}
+              disabled={loadingDelete}
             >
               {loadingDelete ? (
                 <BeatLoader size={5} color="white" />
@@ -163,4 +156,4 @@ const Link = () => {
   );
 }
 
-export default Link
+export default Link;
